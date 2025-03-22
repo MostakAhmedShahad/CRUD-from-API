@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 const colorRed = Color.fromRGBO(235, 28, 36, 1);
 const colorGreen = Color.fromRGBO(33, 191, 115, 1);
 const colorWhite = Color.fromRGBO(255, 255, 255, 1);
-const colorDarkBlue = Color.fromRGBO(44, 62, 80, 1);
+const colorDarkBlue = Color.fromRGBO(60, 9, 189, 1);
 
 // Text Styles
 const TextStyle appBarTitleStyle = TextStyle(

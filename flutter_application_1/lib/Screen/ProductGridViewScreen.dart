@@ -70,6 +70,8 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -94,9 +96,12 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // 2 columns
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: screenWidth > 1200
+                          ? 4
+                          : screenWidth > 800
+                              ? 3
+                              : 2, // Adjust columns based on screen width
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                       childAspectRatio: 0.8, // Adjust card aspect ratio
