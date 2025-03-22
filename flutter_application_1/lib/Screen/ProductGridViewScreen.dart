@@ -136,34 +136,7 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Display product image if available
-              if (product.img != null)
-                Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(product.img!),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                )
-              else
-                Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple.shade200,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.image,
-                      size: 50,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 10),
+              // Product Name
               Text(
                 product.productName ?? 'Unknown',
                 style: const TextStyle(
@@ -171,7 +144,8 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 10),
+              // Product Code
               Text(
                 'Code: ${product.productCode ?? 'N/A'}',
                 style: TextStyle(
@@ -180,6 +154,7 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
                 ),
               ),
               const SizedBox(height: 5),
+              // Unit Price
               Text(
                 'Unit Price: \$${product.unitPrice ?? 'N/A'}',
                 style: TextStyle(
@@ -188,6 +163,7 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
                 ),
               ),
               const SizedBox(height: 5),
+              // Total Price
               Text(
                 'Total Price: \$${product.totalPrice ?? 'N/A'}',
                 style: TextStyle(
@@ -196,8 +172,9 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
                 ),
               ),
               const Spacer(),
+              // Edit and Delete Buttons
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.blue),
@@ -260,22 +237,13 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Skeleton for image
-                  Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade200,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
                   // Skeleton for text
                   Container(
                     height: 20,
                     width: 120,
                     color: Colors.grey.shade300,
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 10),
                   Container(
                     height: 15,
                     width: 80,
