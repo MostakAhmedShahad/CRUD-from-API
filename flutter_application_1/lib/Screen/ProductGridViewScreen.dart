@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Screen/pojo_file_product_grid_view.dart';
 import 'package:flutter_application_1/Screen/product_update.dart';
@@ -36,30 +35,28 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
       setState(() {
         dataLoadingInProgress = false;
       });
-      //print('Failed to load data. Status Code: ${response.statusCode}');
     }
   }
 
-  Future<void> deleteProduct( productId) async {
+  Future<void> deleteProduct(productId) async {
     Uri uri = Uri.parse(
         'https://crud.teamrabbil.com/api/v1/DeleteProduct/$productId');
-    
-    var response = await httpClient.get(
-      uri,
-      
-       
-    );
+
+    var response = await httpClient.get(uri);
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Product delete successfully!"),
+          content: Text("Product deleted successfully!"),
+          backgroundColor: Colors.green,
         ),
       );
+      getProductListFromApi(); // Refresh the list after deletion
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Failed to delete product!"),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -74,108 +71,223 @@ class _ProductgridviewscreenState extends State<Productgridviewscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Grid View'),
-          // actions: [
-          //   Padding(
-          //     padding: EdgeInsets.all(15),
-          //     child: IconButton(
-          //         onPressed: () {
-          //           Navigator.push(context,
-          //               MaterialPageRoute(builder: (context) => ProductUpdate(productId: ,)));
-          //         },
-          //         icon: Icon(Icons.edit)),
-          //   )
-          // ],
+      appBar: AppBar(
+        title: const Text(
+          'Product Grid View',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            getProductListFromApi();
-          },
-          child: dataLoadingInProgress
-              ? const Center(child: CircularProgressIndicator())
-              : (productListModel.data == null ||
-                      productListModel.data!.isEmpty)
-                  ? const Center(
-                      child:
-                          Text('No products found')) //   Check for empty data
-                  : ListView.builder(
-                      itemCount: productListModel.data?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        final product = productListModel.data![index];
+        backgroundColor: Colors.deepPurple,
+        elevation: 10,
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          getProductListFromApi();
+        },
+        child: dataLoadingInProgress
+            ? _buildLoadingSkeleton()
+            : (productListModel.data == null || productListModel.data!.isEmpty)
+                ? const Center(
+                    child: Text(
+                      'No products found',
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // 2 columns
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.8, // Adjust card aspect ratio
+                    ),
+                    itemCount: productListModel.data?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      final product = productListModel.data![index];
+                      return _buildProductCard(product);
+                    },
+                  ),
+      ),
+    );
+  }
 
-                        return Padding(
-                          padding: EdgeInsets.all(10),
-                          child: ListTile(
-                            title: Column(
-                              children: [
-                                Text(product.productName ?? 'Unknown'),
-                                Text(
-                                    'Product Code: ${product.productCode ?? 'N/A'}'),
-                                Text(
-                                    'Unit Price: ${product.unitPrice ?? 'N/A'}'),
-                                Text(
-                                    'Total Price: ${product.totalPrice ?? 'N/A'}'),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                    icon: Icon(Icons.edit, color: Colors.blue),
-                                    onPressed: () {
-                                      // 1️⃣ CHANGE HERE: Pass product ID dynamically to ProductUpdate page
-                                      if (product.sId != null) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                ProductUpdate(productId: product.sId!),
-                                          ),
-                                        );
-                                      } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text("Product ID is missing!")),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      // 1️⃣ CHANGE HERE: Pass product ID dynamically to ProductUpdate page
-                                      if (product.sId != null) {
-                                         deleteProduct( product.sId);
-                                      } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text("Product ID is missing!")),
-                                        );
-                                      }
-                                    },
-                                  ),
-                              ],
-                            ),
-                            
-
-
-
-
-
-
+  Widget _buildProductCard(Data product) {
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple.shade100, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Display product image if available
+              if (product.img != null)
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(product.img!),
+                      fit: BoxFit.cover,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                )
+              else
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple.shade200,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.image,
+                      size: 50,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 10),
+              Text(
+                product.productName ?? 'Unknown',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Code: ${product.productCode ?? 'N/A'}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Unit Price: \$${product.unitPrice ?? 'N/A'}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Total Price: \$${product.totalPrice ?? 'N/A'}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      if (product.sId != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProductUpdate(productId: product.sId!),
                           ),
                         );
-                      },
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      if (product.sId != null) {
+                        deleteProduct(product.sId);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.8,
+      ),
+      itemCount: 6, // Show 6 skeleton cards
+      itemBuilder: (context, index) {
+        return Card(
+          elevation: 5,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.deepPurple.shade100, Colors.white],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Skeleton for image
+                  Container(
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple.shade200,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-        ));
+                  ),
+                  const SizedBox(height: 10),
+                  // Skeleton for text
+                  Container(
+                    height: 20,
+                    width: 120,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 5),
+                  Container(
+                    height: 15,
+                    width: 80,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 5),
+                  Container(
+                    height: 15,
+                    width: 100,
+                    color: Colors.grey.shade300,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
-
-
-
-
-
-
-
-
-
-
